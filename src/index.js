@@ -1,11 +1,11 @@
 const form = document.querySelector("form");
 const list = document.querySelector(".list");
-const button = document.querySelector(".more");
+const button = document.querySelector(".load-more");
 
 const BASE_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
 const API = "9cTjAjlRB53wyhAFk5VzXcBu5GiPU6fK";
 
-let pageToFetch = 0;
+let pageToFetch = 1;
 let keyword = "";
 
 function fetchEvent(page, keyword) {
