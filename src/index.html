@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <link rel="stylesheet" href="./style.css" />
-</head>
+  <body>
+    <div class="search-toolbar">
+      <form class="search-form" id="search-form">
+        <input
+          class="search-form-input"
+          type="text"
+          name="searchQuery"
+          autocomplete="off"
+          placeholder="Search images..."
+        />
+        <button class="search-form-button" type="submit"><i class="fa fa-search"></i></button>
+      </form>
+    </div>
 
-<body>
-  <form>
-    <label>
-      Search event:
-      <input type="text" name="query">
-      <button>Search</button>
-    </label>
-  </form>
-  <ul class="list"></ul>
-  <button class="load-more invisible">Load more</button>
-  <script src="./index.js" type="module"></script>
-</body>
+    <div class="gallery">
+      <!-- Карточки изображений -->
+    </div>
 
+    <ul class="list"></ul>
+    <button class="load-more invisible">Load more</button>
+    <script src="./index.js" type="module"></script>
+  </body>
 </html>
