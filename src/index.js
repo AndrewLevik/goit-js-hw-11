@@ -1,81 +1,118 @@
-const form = document.querySelector("form");
-const list = document.querySelector(".list");
-const button = document.querySelector(".load-more");
+import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
-const BASE_URL = "https://app.ticketmaster.com/discovery/v2/events.json";
-const API = "9cTjAjlRB53wyhAFk5VzXcBu5GiPU6fK";
+const input = document.querySelector('.search-form-input');
+const btnSearch = document.querySelector('.search-form-button');
+const gallery = document.querySelector('.gallery');
+const btnLoadMore = document.querySelector('.load-more');
 
-let pageToFetch = 1;
-let keyword = "";
-
-function fetchEvent(page, keyword) {
-  const params = new URLSearchParams({
-    apikey: API,
-    page,
-    keyword,
-    size: 40,
-  });
-
-  return fetch(`${BASE_URL}?${params}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(response.status);
-      }
-      return response.json();
-    })
-    .catch((error) => console.log(error));
-}
-
-function getEvents(page, keyword) {
-  fetchEvent(page, keyword).then((data) => {
-    console.log(data.page.totalElements);
-
-    if (data.page.totalElements === 0) {
-      button.classList.add("invisible");
-      alert(`There are no events by keyword ${keyword}`);
-    }
-
-    const events = data?._embedded?.events;
-    if (events) {
-      renderEvents(events);
-    }
-
-    if (pageToFetch === data.page.totalPages - 1) {
-      button.classList.add("invisible");
-      alert("Finish");
-      return;
-    }
-    pageToFetch += 1;
-    if (data.page.totalPages > 1) {
-      button.classList.remove("invisible");
-    }
-  });
-}
-
-function renderEvents(events) {
-  const markup = events
-    .map(({ name, images }) => {
-      return `<li>
-    <img src='${images[0].url}' alt='${name}' width='200'>
-    <p>${name}</p>
-    </li>`;
-    })
-    .join("");
-  list.insertAdjacentHTML("beforeend", markup);
-}
-
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const query = event.target.elements.query.value;
-  keyword = query;
-  pageToFetch = 0;
-  list.innerHTML = "";
-  if (!query) {
-    return;
-  }
-  getEvents(pageToFetch, query);
+let gallerySimpleLightbox = new SimpleLightbox('.gallery a', {
+  captions: false,
 });
 
-button.addEventListener("click", () => {
-  getEvents(pageToFetch, keyword);
+let pageNumber = 1;
+
+btnLoadMore.style.display = 'none';
+
+const KEY = '29588079-fbc492831fdad231bf7222b96';
+
+const fetchImages = async (inputValue, pageNum) => {
+  return await fetch(
+    `https://pixabay.com/api/?key=${KEY}&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${pageNum}`
+  )
+    .then(async response => {
+      if (!response.ok) {
+        if (response.status === 404) {
+          return [];
+        }
+        throw new Error(response.status);
+      }
+      return await response.json();
+    })
+    .catch(error => {
+      console.error(error);
+    });
+};
+
+btnSearch.addEventListener('click', event => {
+  event.preventDefault();
+  cleanGallery();
+  const trimmedValue = input.value.trim();
+  if (trimmedValue !== '') {
+    fetchImages(trimmedValue, pageNumber).then(foundData => {
+      if (foundData.hits.length === 0) {
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      } else {
+        renderImageList(foundData.hits);
+        Notiflix.Notify.success(
+          `Hooray! We found ${foundData.totalHits} images.`
+        );
+        btnLoadMore.style.display = 'block';
+        gallerySimpleLightbox.refresh();
+      }
+    });
+  }
+});
+
+btnLoadMore.addEventListener('click', event => {
+  event.preventDefault();
+  pageNumber += 1;
+  const trimmedValue = input.value.trim();
+  btnLoadMore.style.display = 'none';
+  fetchImages(trimmedValue, pageNumber).then(foundData => {
+    if (foundData.hits.length === 0) {
+      Notiflix.Notify.failure(
+        'Sorry, there are no images matching your search query. Please try again.'
+      );
+    } else {
+      renderImageList(foundData.hits);
+      Notiflix.Notify.success(
+        `Hooray! We found ${foundData.totalHits} images.`
+      );
+      btnLoadMore.style.display = 'block';
+      gallerySimpleLightbox.refresh();
+    }
+  });
+});
+
+function renderImageList(images) {
+  console.log(images, 'images');
+  const markup = images
+    .map(image => {
+      console.log('img', image);
+      return `<div class="photo-card">
+       <a href="${image.largeImageURL}"><img class="photo" src="${image.webformatURL}" alt="${image.tags}" title="${image.tags}" loading="lazy"/></a>
+        <div class="info">
+           <p class="info-item">
+                <b>Likes</b> <span class="info-item-api">${image.likes}</span>
+            </p>
+            <p class="info-item">
+                <b>Views</b> <span class="info-item-api">${image.views}</span>  
+            </p>
+            <p class="info-item">
+                <b>Comments</b> <span class="info-item-api">${image.comments}</span>  
+            </p>
+            <p class="info-item">
+                <b>Downloads</b> <span class="info-item-api">${image.downloads}</span> 
+            </p>
+        </div>
+    </div>`;
+    })
+    .join('');
+  gallery.innerHTML += markup;
+}
+
+function cleanGallery() {
+  gallery.innerHTML = '';
+  pageNumber = 1;
+  btnLoadMore.style.display = 'none';
+}
+
+gallery.addEventListener('keydown', event => {
+  if (event.key === 'Escape') {
+    instance.close();
+  }
 });
