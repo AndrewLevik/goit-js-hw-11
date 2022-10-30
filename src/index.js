@@ -63,9 +63,10 @@ btnLoadMore.addEventListener('click', event => {
   event.preventDefault();
   pageNumber += 1;
   const trimmedValue = input.value.trim();
-  // btnLoadMore.style.display = 'none';
+  btnLoadMore.style.display = 'none';
   fetchImages(trimmedValue, pageNumber).then(foundData => {
     if (foundData.hits.length === 0) {
+      console.log(foundData)
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
