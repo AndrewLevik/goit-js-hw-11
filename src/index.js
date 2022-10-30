@@ -1,6 +1,7 @@
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
+import { fetchImages } from './js/axios-fetch';
 
 const input = document.querySelector('.search-form-input');
 const btnSearch = document.querySelector('.search-form-button');
@@ -15,43 +16,21 @@ let pageNumber = 1;
 
 btnLoadMore.style.display = 'none';
 
-const KEY = '29588079-fbc492831fdad231bf7222b96';
-
-const fetchImages = async (inputValue, pageNum) => {
-  return await fetch(
-    `https://pixabay.com/api/?key=${KEY}&q=${inputValue}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=${pageNum}`
-  )
-    .then(async response => {
-      if (!response.ok) {
-        if (response.status === 404) {
-          return [];
-        }
-        throw new Error(response.status);
-      }
-      return await response.json();
-    })
-    .catch(error => {
-      console.error(error);
-    });
-};
-
 btnSearch.addEventListener('click', event => {
   event.preventDefault();
   cleanGallery();
   const trimmedValue = input.value.trim();
   if (trimmedValue !== '') {
-    fetchImages(trimmedValue, pageNumber).then(foundData => {
-      if (foundData.hits.length === 0) {  
-        console.log(foundData)
+    fetchImages(trimmedValue, pageNumber).then(({ data }) => {
+      if (data.totalHits === 0) {
+        console.log(data);
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
       } else {
-        renderImageList(foundData.hits);
-        console.log(foundData)
-         Notiflix.Notify.success(
-          `Hooray! We found ${foundData.totalHits} images.`
-          );
+        renderImageList(data.hits);
+        console.log(data);
+        Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
         btnLoadMore.style.display = 'block';
         gallerySimpleLightbox.refresh();
       }
@@ -64,20 +43,25 @@ btnLoadMore.addEventListener('click', event => {
   pageNumber += 1;
   const trimmedValue = input.value.trim();
   btnLoadMore.style.display = 'none';
-  fetchImages(trimmedValue, pageNumber).then(foundData => {
-    if (foundData.hits.length === 0) {
-      console.log(foundData)
+  fetchImages(trimmedValue, pageNumber).then(({ data }) => {
+    if (data.totalHits === 0) {
+      console.log(data);
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
       );
-    }  else {
-      renderImageList(foundData.hits); 
-      console.log(foundData)
-      // Notiflix.Notify.success(
-      //   `Hooray! We found ${foundData.totalHits} images.`
-      // );
+    } else {
+      renderImageList(data.hits);
+      console.log(data);
+
       btnLoadMore.style.display = 'block';
       gallerySimpleLightbox.refresh();
+
+      if (data['hits'].length === 0) {
+        btnLoadMore.style.display = 'none';
+        Notiflix.Notify.failure(
+          'Sorry, there are no images matching your search query. Please try again.'
+        );
+      }
     }
   });
 });
