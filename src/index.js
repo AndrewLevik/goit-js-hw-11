@@ -86,7 +86,7 @@ function renderGallery(images) {
         comments,
         downloads,
       }) => {
-        console.log('img', image);
+        console.log('img', images);
         return `<div class="gallery">
        <a href="${largeImageURL}"><img class="photo" src="${webformatURL}" alt="${tags}" title="${tags}" loading="lazy"/></a>
         <div class="info">
