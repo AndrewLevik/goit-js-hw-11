@@ -3,7 +3,7 @@ import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import fetchImages from './fetch-images.js';
 
-const input = document.querySelector('.search-form-input');
+const form = document.querySelector('.search-form');
 const btnSearch = document.querySelector('.search-form-button');
 const btnLoadMore = document.querySelector('.load-more');
 const gallery = document.querySelector('.gallery');
@@ -14,41 +14,38 @@ let pageNumber = 1;
 
 btnLoadMore.style.display = 'none';
 
-input.addEventListener('submit', onFormSubmit);
+form.addEventListener('submit', onFormSubmit);
 btnLoadMore.addEventListener('click', onLoadMore);
 
 async function onFormSubmit(e) {
-  
-  e.preventDefault();
-  pageNumber = 1;
-  gallery.innerHTML = '';
-  const trimmedValue = btnSearch.value.trim();
+    e.preventDefault();
+    pageNumber = 1;
+    gallery.innerHTML = '';
+    const searchQuery = btnSearch.value.trim();
 
-  if (trimmedValue === '') {
-    Notiflix.Notify.failure(
-      'Sorry, there are no images matching your search query. Please try again.'
-    );
-    return;
-  } else {
-    const data = await fetchImages(trimmedValue, pageNumber);
-
-    if (data.hits.length === 0) {
-      Notiflix.Notify.failure(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
+    if (searchQuery === '') {
+        Notiflix.Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+            return
     } else {
-      renderGallery(data.hits);
-      Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
-      btnLoadMore.classList.remove('is-hidden');
-    }
-  }
+        const data = await fetchImages(searchQuery, pageNumber);
+
+        if (data.hits.length === 0) {
+        Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+        } else {
+
+        renderGallery(data.hits);
+            Notiflix.Notify.success(`Hooray! We found ${data.totalHits} images.`);
+            btnLoadMore.classList.remove('is-hidden');
+    };
+}
 }
 
-async function onLoadMore() {
+async function onLoadMore(e) {
+  e.preventDefault();
   pageNumber += 1;
-  const trimmedValue = btnSearch.value.trim();
+  const searchQuery = btnSearch.value.trim();
   
-  const data = await fetchImages(trimmedValue, pageNumber);
+  const data = await fetchImages(searchQuery, pageNumber);
 
   if (data.hits.length === 0) {
     Notiflix.Notify.warning(
